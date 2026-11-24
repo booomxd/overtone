@@ -1,0 +1,25 @@
+name: release
+
+# Pushing a tag like v0.1.0 builds overtone.exe and publishes a release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release --locked
+      - name: Publish
+        shell: bash
+        run: |
+          cp target/release/overtone.exe .
+          sha256sum overtone.exe > SHA256SUMS
+          gh release create "$GITHUB_REF_NAME" --title "Overtone $GITHUB_REF_NAME" --generate-notes overtone.exe SHA256SUMS
+        env:
+          GH_TOKEN: ${{ github.token }}
