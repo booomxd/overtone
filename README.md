@@ -1,7 +1,6 @@
 <h3 align="center"><img src=".github/assets/logo.svg" width="600px" alt="Overtone"></h3>
 <p align="center">
-  <a href="https://github.com/booomxd/overtone/releases/latest"><img src="https://img.shields.io/github/release/booomxd/overtone/all.svg?colorB=8b5cf6&label=latest%20version"></a>
-  <a href="https://github.com/booomxd/overtone/releases"><img src="https://img.shields.io/github/downloads/booomxd/overtone/total.svg?colorB=8b5cf6&label=total%20downloads"></a>
+  <img src="https://img.shields.io/badge/status-under%20development-f59e0b.svg">
   <a href="https://github.com/booomxd/overtone/actions/workflows/ci.yml"><img src="https://github.com/booomxd/overtone/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-8b5cf6.svg"></a>
 </p>
@@ -10,6 +9,9 @@
 
 Theme engine and mod layer for the official Spotify desktop client.
 Supports Windows.
+
+> [!WARNING]
+> Overtone is still under development. There's no release yet, things may break or change, and features are still being added. To try it now, build it from source (see Installation).
 
 <img src=".github/assets/editor.png" alt="The Overtone theme editor inside Spotify" align="right" width="300px">
 
@@ -23,11 +25,11 @@ Supports Windows.
 
 ### Installation
 
-1. Install Spotify from [spotify.com/download](https://www.spotify.com/download/). The Microsoft Store version can't be modded.
-2. Download `overtone.exe` from the [latest release](https://github.com/booomxd/overtone/releases/latest).
-3. Run `overtone.exe` to open Spotify. If Spotify is already open, it restarts once.
+Prebuilt downloads will come with the first release. Until then:
 
-Windows may warn about an unknown publisher because the exe isn't code-signed. Choose **More info → Run anyway**, or build it yourself.
+1. Install Spotify from [spotify.com/download](https://www.spotify.com/download/). The Microsoft Store version can't be modded.
+2. Install [Rust](https://rustup.rs), then build Overtone: `cargo build --release`.
+3. Run `target\release\overtone.exe` to open Spotify. If Spotify is already open, it restarts once.
 
 ### Basic Usage
 
