@@ -28,23 +28,49 @@ fn main() {
 
 fn run() -> Result<(), String> {
     let exe = spotify_exe()?;
-    let page = match page_socket() {
-        // Already running under Overtone (e.g. launched twice): attach.
-        Some(url) => url,
-        None => {
-            if spotify_running() {
-                log("restarting Spotify with the DevTools port");
-                let _ = Command::new("taskkill").args(["/IM", "Spotify.exe", "/F"]).output();
-                std::thread::sleep(Duration::from_millis(1500));
-            }
-            Command::new(&exe)
-                .arg(format!("--remote-debugging-port={PORT}"))
-                .spawn()
-                .map_err(|e| format!("Could not start Spotify ({}): {e}", exe.display()))?;
-            wait_for_page(Duration::from_secs(45))?
+    // Already running under Overtone (launched twice, or the UI is hidden in
+    // the tray): attach instead of restarting.
+    if http_get("/json/version").is_none() {
+        if spotify_running() {
+            log("restarting Spotify with the DevTools port");
+            let _ = Command::new("taskkill").args(["/IM", "Spotify.exe", "/F"]).output();
+            std::thread::sleep(Duration::from_millis(1500));
         }
-    };
-    inject(&page)
+        Command::new(&exe)
+            .arg(format!("--remote-debugging-port={PORT}"))
+            .spawn()
+            .map_err(|e| format!("Could not start Spotify ({}): {e}", exe.display()))?;
+        let start = Instant::now();
+        while http_get("/json/version").is_none() {
+            if start.elapsed() > Duration::from_secs(45) {
+                return Err("Spotify started, but never became ready for Overtone.".into());
+            }
+            std::thread::sleep(Duration::from_millis(300));
+        }
+    }
+    // Spotify unloads its UI when the window is closed to the tray and loads
+    // a new page when it's reopened; inject into each one until Spotify exits.
+    while let Some(page) = next_page() {
+        inject(&page)?;
+    }
+    log("Spotify exited");
+    Ok(())
+}
+
+/// Waits for Spotify's UI page; `None` once Spotify's DevTools server is gone.
+fn next_page() -> Option<String> {
+    let mut misses = 0;
+    loop {
+        if let Some(url) = page_socket() {
+            return Some(url);
+        }
+        // Several failed polls in a row: Spotify has exited.
+        misses = if http_get("/json/version").is_some() { 0 } else { misses + 1 };
+        if misses >= 5 {
+            return None;
+        }
+        std::thread::sleep(Duration::from_millis(500));
+    }
 }
 
 /// The classic installer's Spotify. The Microsoft Store build is sandboxed
@@ -105,17 +131,6 @@ fn page_socket() -> Option<String> {
     })
 }
 
-fn wait_for_page(timeout: Duration) -> Result<String, String> {
-    let start = Instant::now();
-    while start.elapsed() < timeout {
-        if let Some(url) = page_socket() {
-            return Ok(url);
-        }
-        std::thread::sleep(Duration::from_millis(300));
-    }
-    Err("Spotify started, but its window never became ready for Overtone.".into())
-}
-
 /// Injects the runtime now and on every reload, then waits until Spotify
 /// closes the page; the injection only lasts as long as this connection.
 fn inject(url: &str) -> Result<(), String> {
@@ -141,7 +156,7 @@ fn inject(url: &str) -> Result<(), String> {
             Ok(_) => {}
         }
     }
-    log("Spotify closed");
+    log("page closed");
     Ok(())
 }
 
