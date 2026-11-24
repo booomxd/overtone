@@ -2,7 +2,7 @@
 
 A personal mod layer for the official Spotify desktop client on Windows: a theme engine with a live editor, and plugins for features Spotify doesn't have. Playback, login and the catalogue stay Spotify's own; Overtone only adds a layer on top.
 
-Private and for personal use. Modifying the Spotify client is against Spotify's terms of service. Overtone never redistributes Spotify's files and never patches them on disk.
+For personal use. Modifying the Spotify client is against Spotify's terms of service. Overtone never redistributes Spotify's files and never patches them on disk.
 
 ## How it works
 
