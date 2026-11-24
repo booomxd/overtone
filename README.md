@@ -35,7 +35,7 @@ Problems are logged to `%APPDATA%\Overtone\launcher.log`.
 cargo build --release
 ```
 
-The exe is `target\release\overtone.exe`; the runtime is embedded in it. Pushing a tag like `v0.2.0` builds and publishes a release.
+The exe is `target\release\overtone.exe`; the runtime is embedded in it. Publishing a release (`gh release create v0.2.0 --generate-notes`) builds the exe and attaches it.
 
 ## Findings (Spotify 1.3.10.2586, November 2026)
 
