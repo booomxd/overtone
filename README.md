@@ -1,60 +1,64 @@
-# Overtone
+<h3 align="center"><img src=".github/assets/logo.svg" width="600px" alt="Overtone"></h3>
+<p align="center">
+  <a href="https://github.com/booomxd/overtone/releases/latest"><img src="https://img.shields.io/github/release/booomxd/overtone/all.svg?colorB=8b5cf6&label=latest%20version"></a>
+  <a href="https://github.com/booomxd/overtone/releases"><img src="https://img.shields.io/github/downloads/booomxd/overtone/total.svg?colorB=8b5cf6&label=total%20downloads"></a>
+  <a href="https://github.com/booomxd/overtone/actions/workflows/ci.yml"><img src="https://github.com/booomxd/overtone/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-8b5cf6.svg"></a>
+</p>
 
-A mod layer for the official Spotify desktop client on Windows: a theme engine with built-in themes and a live editor, with more features to come. Playback, login and the catalogue stay Spotify's own; Overtone only adds a layer on top.
+---
 
-For personal use. Modifying the Spotify client is against Spotify's terms of service. Overtone never redistributes Spotify's files and never patches them on disk.
+Theme engine and mod layer for the official Spotify desktop client.
+Supports Windows.
 
-## Install
+<img src=".github/assets/editor.png" alt="The Overtone theme editor inside Spotify" align="right" width="300px">
+
+### Features
+
+- Recolour the whole interface with 8 built-in themes: Spotify, Midnight, Rosé, Cocoa, Frost, Ember, Amoled and Paper
+- Edit every colour, the corner radius and the font live, right inside Spotify
+- Tint buttons and progress bars with the colour of the album that's playing
+- Save your own themes and share them as text with Copy theme / Paste theme
+- Nothing is patched on disk, so Spotify updates never remove it
+
+### Installation
 
 1. Install Spotify from [spotify.com/download](https://www.spotify.com/download/). The Microsoft Store version can't be modded.
-2. Download `overtone.exe` from the [latest release](https://github.com/booomxd/overtone/releases/latest) and put it anywhere, for example on your desktop.
-3. Open Spotify by running `overtone.exe` instead of Spotify. If Spotify is already open, Overtone restarts it once.
+2. Download `overtone.exe` from the [latest release](https://github.com/booomxd/overtone/releases/latest).
+3. Run `overtone.exe` to open Spotify. If Spotify is already open, it restarts once.
 
-Windows may warn that the app is from an unknown publisher, because it isn't code-signed. Choose **More info → Run anyway**, or build it yourself (see below).
+Windows may warn about an unknown publisher because the exe isn't code-signed. Choose **More info → Run anyway**, or build it yourself.
 
-## Using it
+### Basic Usage
 
-- Click the **O** button next to your profile picture, or press **Ctrl+Shift+O**, to open the theme editor.
-- Pick a built-in theme: Spotify, Midnight, Rosé, Cocoa, Frost, Ember, Amoled or Paper (light).
-- Change any colour, the corner radius or the font; changes apply live and are saved.
-- **Accent from album art** tints buttons and progress bars with the colour of the song that's playing.
-- **Save as…** keeps your edits as a new theme. **Copy theme** and **Paste theme** share themes as text, so friends can send you theirs.
+- Click the **O** next to your profile picture, or press **Ctrl+Shift+O**, to open the theme editor.
+- Changes apply instantly and are saved in Spotify's own storage.
+- Reopening Spotify from the tray keeps Overtone loaded while `overtone.exe` runs in the background.
 
-Settings live in Spotify's own storage, so they survive restarts and Spotify updates.
+<br clear="right">
 
-## How it works
+---
 
-1. **Launcher (`src/main.rs`, Rust).** Starts the installed Spotify (`%APPDATA%\Spotify`) with a Chrome DevTools Protocol port on `127.0.0.1`, injects the runtime into Spotify's UI page, and registers it to run again on every reload. It stays running in the background, with no window, until Spotify exits. No Spotify files are modified, so Spotify updates can't wipe the mod.
-2. **Runtime (`runtime/overtone.js`, runs inside Spotify).** The theme engine and the editor panel. Spotify's UI is coloured by CSS variables in its `@layer encore` stylesheet (`--background-base`, `--text-base`, `--essential-bright-accent` and others), so a theme is a set of variable overrides; Overtone's rules are unlayered, which makes them win without fighting selectors.
+### How it works
 
-Problems are logged to `%APPDATA%\Overtone\launcher.log`.
+`overtone.exe` starts Spotify with a local Chrome DevTools Protocol port and injects [`runtime/overtone.js`](runtime/overtone.js) into Spotify's interface on every load, then stays in the background, without a window, until Spotify exits. Spotify colours its interface with CSS variables in an `@layer encore` stylesheet, so a theme is a set of variable overrides. Problems are logged to `%APPDATA%\Overtone\launcher.log`.
 
-## Build
+### Building
 
 ```
 cargo build --release
 ```
 
-The exe is `target\release\overtone.exe`; the runtime is embedded in it. Publishing a release (`gh release create v0.2.0 --generate-notes`) builds the exe and attaches it.
+The exe is `target\release\overtone.exe`, with the runtime embedded. Publishing a release (`gh release create v0.2.0 --generate-notes`) builds the exe and attaches it.
 
-## Findings (Spotify 1.3.10.2586, November 2026)
+### Security
 
-- `--remote-debugging-port` works; the UI page is `https://xpui.app.spotify.com/index.html` (Chromium 156).
-- `__webpack_modules__` is a global, React drives the UI, and colours come from CSS variables in `@layer encore`, per colour set (`.encore-base-set`, `.encore-bright-accent-set`, …).
-- The UI ships as `Apps/xpui.spa` (a zip of 644 files), loaded by `index.html` and `xpui-snapshot.js`.
+While Spotify runs under Overtone it listens on a debugging port that only accepts connections from this PC; Chromium also refuses connections from web pages. Any program already running on your PC could use it to control Spotify. The port closes when Spotify exits.
 
-## Roadmap
+### Disclaimer
 
-- [x] Launcher: start Spotify with the debugging port, inject, re-inject on reload
-- [x] Theme engine, built-in themes, live editor, album-art accent
-- [ ] Runtime: module finder and plugin system
-- [ ] Plugins: global hotkeys, queue tools, local listening stats, Discord rich presence
-- [ ] Glass and compact layouts
+Overtone is an unofficial project and isn't affiliated with Spotify. Modifying the Spotify client is against Spotify's terms of service. Overtone never redistributes or modifies Spotify's files.
 
-## Security
+### License
 
-While Spotify runs under Overtone, it listens on a local debugging port, and any program on this PC could use it to control Spotify. The port only accepts connections from this PC, Chromium rejects connections from web pages, and it closes when Spotify exits.
-
-## License
-
-MIT, see [LICENSE](LICENSE).
+[MIT](LICENSE)
